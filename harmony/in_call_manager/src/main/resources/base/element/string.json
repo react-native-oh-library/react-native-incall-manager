@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "In_call_managerAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "In_call_managerAbility_label",
+      "value": "label"
+    }
+  ]
+}
