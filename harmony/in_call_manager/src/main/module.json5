@@ -1,0 +1,9 @@
+{
+  "module": {
+    "name": "in_call_manager",
+    "type": "har",
+    "deviceTypes": [
+      "default"
+    ]
+  }
+}

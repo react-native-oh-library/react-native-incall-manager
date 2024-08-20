@@ -1,17 +1,19 @@
 'use strict';
-var _InCallManager = require('react-native').NativeModules.InCallManager;
 import {
     Platform,
     Vibration,
+    NativeModules, TurboModuleRegistry
 } from 'react-native';
 
+const _InCallManager = TurboModuleRegistry.get('InCallManagerTurboModule') ? TurboModuleRegistry.getEnforcing('InCallManagerTurboModule') : NativeModules.InCallManager;
+console.log("_InCallManager", _InCallManager);
 class InCallManager {
     constructor() {
         this.vibrate = false;
         this.audioUriMap = {
-            ringtone: { _BUNDLE_: null, _DEFAULT_: null},
-            ringback: { _BUNDLE_: null, _DEFAULT_: null},
-            busytone: { _BUNDLE_: null, _DEFAULT_: null},
+            ringtone: { _BUNDLE_: null, _DEFAULT_: null },
+            ringback: { _BUNDLE_: null, _DEFAULT_: null },
+            busytone: { _BUNDLE_: null, _DEFAULT_: null },
         };
     }
 
@@ -47,6 +49,9 @@ class InCallManager {
             enable = (enable === true) ? true : false;
             brightness = (typeof brightness === 'number') ? brightness : 0;
             _InCallManager.setFlashOn(enable, brightness);
+        } else if (Platform.OS === 'harmony') {
+            enable = (enable === true) ? true : false;
+            _InCallManager.setFlashOn(enable);
         } else {
             console.log("Android doesn't support setFlashOn(enable, brightness)");
         }
@@ -59,18 +64,34 @@ class InCallManager {
     }
 
     setSpeakerphoneOn(enable) {
-        enable = (enable === true) ? true : false;
-        _InCallManager.setSpeakerphoneOn(enable);
+        if (Platform.OS === 'harmony') {
+            console.log("harmony doesn't support setForceSpeakerphoneOn()");
+        } else {
+            enable = (enable === true) ? true : false;
+            _InCallManager.setSpeakerphoneOn(enable);
+        }
     }
 
     setForceSpeakerphoneOn(_flag) {
-        let flag = (typeof _flag === "boolean") ? (_flag) ? 1 : -1 : 0;
-        _InCallManager.setForceSpeakerphoneOn(flag);
+        if (Platform.OS === 'harmony') {
+            console.log("harmony doesn't support setForceSpeakerphoneOn()");
+        } else {
+            let flag = (typeof _flag === "boolean") ? (_flag) ? 1 : -1 : 0;
+            _InCallManager.setForceSpeakerphoneOn(flag);
+        }
     }
 
     setMicrophoneMute(enable) {
-        enable = (enable === true) ? true : false;
-        _InCallManager.setMicrophoneMute(enable);
+
+        if (Platform.OS === 'android') {
+            enable = (enable === true) ? true : false;
+            _InCallManager.setMicrophoneMute(enable);
+        }
+        else if (Platform.OS === 'harmony') {
+            console.log("harmony doesn't support setMicrophoneMute()");
+        } else if (Platform.OS === 'ios') {
+            console.log("ios doesn't support setMicrophoneMute()");
+        }
     }
 
     startRingtone(ringtone, vibrate_pattern, ios_category, seconds) {
@@ -101,7 +122,7 @@ class InCallManager {
     startProximitySensor() {
         _InCallManager.startProximitySensor();
     }
-  
+
     stopProximitySensor() {
         _InCallManager.stopProximitySensor();
     }
@@ -119,7 +140,10 @@ class InCallManager {
         if (Platform.OS === 'android') {
             let timeout = (typeof _timeout === "number" && _timeout > 0) ? _timeout : 3000; // --- default 3000 ms
             _InCallManager.pokeScreen(timeout);
-        } else {
+        } else if (Platform.OS === 'harmony') {
+            console.log("harmony doesn't support pokeScreen()");
+        }
+        else {
             console.log("ios doesn't support pokeScreen()");
         }
     }
@@ -146,14 +170,24 @@ class InCallManager {
     }
 
     async chooseAudioRoute(route) {
-        let result = await _InCallManager.chooseAudioRoute(route);
-        return result;
+        if (Platform.OS === 'android') {
+            let result = await _InCallManager.chooseAudioRoute(route);
+            return result;
+        } else if (Platform.OS === 'harmony') {
+            console.log("harmony doesn't support chooseAudioRoute()");
+        }
+        else {
+            console.log("ios doesn't support chooseAudioRoute()");
+        }
     }
 
     async requestAudioFocus() {
         if (Platform.OS === 'android') {
             return await _InCallManager.requestAudioFocusJS();
-        } else {
+        } else if (Platform.OS === 'harmony') {
+            console.log("harmony doesn't support requestAudioFocus()");
+        }
+        else {
             console.log("ios doesn't support requestAudioFocus()");
         }
     }
@@ -161,8 +195,10 @@ class InCallManager {
     async abandonAudioFocus() {
         if (Platform.OS === 'android') {
             return await _InCallManager.abandonAudioFocusJS();
+        } else if (Platform.OS === 'harmony') {
+            console.log("harmony doesn't support abandonAudioFocus()");
         } else {
-            console.log("ios doesn't support requestAudioFocus()");
+            console.log("ios doesn't support abandonAudioFocus()");
         }
     }
 }
