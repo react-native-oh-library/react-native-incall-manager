@@ -25,14 +25,13 @@
 import media from '@ohos.multimedia.media';
 import type resourceManager from '@ohos.resourceManager';
 import { type BusinessError } from '@ohos.base';
-import Logger from '../Logger'
 import { type common } from '@kit.AbilityKit';
 import { audio } from '@kit.AudioKit';
-import { AudioFocusType } from '..';
 import { avSession } from '@kit.AVSessionKit';
+import Logger from '../Logger';
+import { AudioFocusType } from '../index';
 
 const TAG: string = 'PlayModel';
-
 const AVSESSIONTAG: string = 'ringtoneplayering';
 const AVSESSIONTYPE: 'audio' = 'audio';
 
@@ -62,7 +61,6 @@ export default class PlayModel {
   private interruptResultBack: (code: number, codeText: string) => void;
   private audioLoop: boolean = false;
   private isRequireAvSession: boolean = false;
-  private avSessionOnButtonEventBack: (code: number, codeText: string) => void;
   private interruptMode: audio.InterruptMode = audio.InterruptMode.SHARE_MODE;
   private avSession: avSession.AVSession;
   public avPlayer: media.AVPlayer | null = null;
@@ -124,7 +122,6 @@ export default class PlayModel {
     if (!this.avPlayer) {
       return;
     }
-
     try {
       let statePlist: string[] =
         [PlayModelState.PREPARED, PlayModelState.PLAYING, PlayModelState.PAUSED, PlayModelState.COMPLETED];
@@ -157,7 +154,6 @@ export default class PlayModel {
       let err: BusinessError = error as BusinessError;
       Logger.error(TAG, 'Failed to paused,error code is :' + err.code);
     }
-
   }
 
   public async playAudio(): Promise<void> {
@@ -165,10 +161,9 @@ export default class PlayModel {
       Logger.error(TAG, 'first create avPlayer');
       return;
     }
-
     try {
-      let isPlayerState = this.avPlayer.state;
-      let requireStateList = [PlayModelState.STOPPED, PlayModelState.INITIALIZED];
+      let isPlayerState: string = this.avPlayer.state as string;
+      let requireStateList: PlayModelState[] = [PlayModelState.STOPPED, PlayModelState.INITIALIZED];
       let playStateList = [PlayModelState.PAUSED, PlayModelState.COMPLETED, PlayModelState.PREPARED];
       if (requireStateList.indexOf(isPlayerState) >= 0) {
         await this.avPlayer.prepare();
@@ -183,7 +178,6 @@ export default class PlayModel {
     } catch (err) {
       Logger.error(TAG, 'Failed to play,error is :' + (err as BusinessError).code);
     }
-
   }
 
   public async release(): Promise<void> {
@@ -217,48 +211,56 @@ export default class PlayModel {
         let focusChangeStr: string = '';
         if (interruptEvent.forceType == audio.InterruptForceType.INTERRUPT_FORCE) {
           switch (interruptEvent.hintType) {
-            case audio.InterruptHint.INTERRUPT_HINT_NONE:
+            case audio.InterruptHint.INTERRUPT_HINT_NONE: {
               focusChangeStr = AudioFocusType.HINT_NONE;
               break;
-            case audio.InterruptHint.INTERRUPT_HINT_PAUSE:
+            }
+            case audio.InterruptHint.INTERRUPT_HINT_PAUSE: {
               focusChangeStr = AudioFocusType.HINT_PAUSE;
               await this.pausedAudio();
               break;
-            case audio.InterruptHint.INTERRUPT_HINT_RESUME:
+            }
+            case audio.InterruptHint.INTERRUPT_HINT_RESUME: {
               focusChangeStr = AudioFocusType.HINT_RESUME;
               await this.playAudio();
               break;
-            case audio.InterruptHint.INTERRUPT_HINT_STOP:
+            }
+            case audio.InterruptHint.INTERRUPT_HINT_STOP: {
               focusChangeStr = AudioFocusType.HINT_STOP;
               await this.stopAudio();
               break;
-            case audio.InterruptHint.INTERRUPT_HINT_DUCK:
+            }
+            case audio.InterruptHint.INTERRUPT_HINT_DUCK: {
               focusChangeStr = AudioFocusType.HINT_DUCK;
               break;
-            case audio.InterruptHint.INTERRUPT_HINT_UNDUCK:
+            }
+            case audio.InterruptHint.INTERRUPT_HINT_UNDUCK: {
               focusChangeStr = AudioFocusType.HINT_UNDUCK;
               break;
+            }
             default:
               break;
           }
         } else if (interruptEvent.forceType == audio.InterruptForceType.INTERRUPT_SHARE) {
           switch (interruptEvent.hintType) {
-            case audio.InterruptHint.INTERRUPT_HINT_NONE:
+            case audio.InterruptHint.INTERRUPT_HINT_NONE: {
               focusChangeStr = AudioFocusType.HINT_NONE;
               break;
-            case audio.InterruptHint.INTERRUPT_HINT_PAUSE:
+            }
+            case audio.InterruptHint.INTERRUPT_HINT_PAUSE: {
               focusChangeStr = AudioFocusType.HINT_PAUSE;
               await this.pausedAudio();
               break;
-            case audio.InterruptHint.INTERRUPT_HINT_RESUME:
+            }
+            case audio.InterruptHint.INTERRUPT_HINT_RESUME: {
               focusChangeStr = AudioFocusType.HINT_RESUME;
               await this.playAudio();
               break;
+            }
             default:
               break;
           }
         }
-
         if (this.interruptResultBack) {
           this.interruptResultBack(interruptEvent.hintType, focusChangeStr);
         }
@@ -276,14 +278,15 @@ export default class PlayModel {
     Logger.info(TAG, `AVPlayer stateChange  ${reason}  :  ${state}`);
     try {
       switch (state) {
-        case PlayModelState.INITIALIZED:
+        case PlayModelState.INITIALIZED: {
           if (this.avPlayer) {
             this.avPlayer.audioRendererInfo = this.audioRenderInfoObj;
             await this.avPlayer.prepare();
             Logger.info(TAG, 'AVPlayer prepare succeeded.');
           }
           break;
-        case PlayModelState.PREPARED:
+        }
+        case PlayModelState.PREPARED: {
           if (this.avPlayer) {
             this.avPlayer.loop = this.audioLoop;
             this.avPlayer.audioInterruptMode = this.interruptMode;
@@ -291,7 +294,8 @@ export default class PlayModel {
             Logger.info(TAG, 'AVPlayer play succeeded.');
           }
           break;
-        case PlayModelState.COMPLETED:
+        }
+        case PlayModelState.COMPLETED: {
           if (this.onPlayComplete) {
             this.onPlayComplete(true, this.avPlayer);
           }
@@ -302,16 +306,20 @@ export default class PlayModel {
             await this.avPlayer.play();
           }
           break;
-        case PlayModelState.PAUSED:
+          
+        }
+        case PlayModelState.PAUSED: {
           this.avPlayer.audioInterruptMode = this.interruptMode;
           break;
+        }
         case PlayModelState.STOPPED:
-        case PlayModelState.ERROR:
+        case PlayModelState.ERROR: {
           if (this.onPlayComplete) {
             this.onPlayComplete(true, this.avPlayer);
           }
           this.release();
           break;
+        }
       }
     } catch (err) {
       Logger.error(TAG, `AVPlayer onStateChange failed ${(err as BusinessError).code}`);

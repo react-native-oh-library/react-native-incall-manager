@@ -24,9 +24,9 @@
 
 import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
 import wantAgent from '@ohos.app.ability.wantAgent';
-import type common from '@ohos.app.ability.common'
+import type common from '@ohos.app.ability.common';
 import { type BusinessError } from '@ohos.base';
-import Logger from '../Logger'
+import Logger from '../Logger';
 
 const TAG: string = 'ContinueBackgroundTaskModel';
 const BACK_UPDATE_TIMEOUT: number = 5000;
@@ -53,7 +53,6 @@ export default class ContinueBackgroundTaskModel {
       requestCode: 0,
       wantAgentFlags: [wantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG]
     }
-
     wantAgent.getWantAgent(wantAgentInfo).then((wantAgentObj) => {
       backgroundTaskManager.startBackgroundRunning(this.context, this.bgModesList, wantAgentObj).then(() => {
         Logger.info(TAG, 'startBackgroundRunning succeeded');

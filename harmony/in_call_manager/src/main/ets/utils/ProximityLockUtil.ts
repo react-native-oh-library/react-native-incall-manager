@@ -24,12 +24,12 @@
 
 import { type BusinessError } from '@ohos.base';
 import { runningLock } from '@kit.BasicServicesKit';
-import Logger from '../Logger'
+import Logger from '../Logger';
 
 const TAG: string = 'ProximityLockUtil';
 
 class ProximityLockUtil {
-  private currentProximityLock: runningLock.RunningLock = undefined;
+  private currentProximityLock: runningLock.RunningLock;
   private lock_tag: string = 'running_lock_proximity_first';
   private lock_time: number = 0;
 

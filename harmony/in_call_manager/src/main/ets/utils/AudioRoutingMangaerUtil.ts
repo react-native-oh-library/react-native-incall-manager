@@ -23,22 +23,21 @@
  */
 
 import { type BusinessError } from '@ohos.base';
-import Logger from '../Logger'
 import { audio } from '@kit.AudioKit';
+import Logger from '../Logger';
 
 const TAG: string = 'AudioRoutingMangaerUtil';
-
 const DEVICECHANGE: 'deviceChange' = 'deviceChange';
 
 class AudioRoutingMangaerUtil {
-  private routingManager: audio.AudioRoutingManager = undefined;
+  private routingManager: audio.AudioRoutingManager;
 
   constructor() {
     this.createRouteManager();
   }
 
   private createRouteManager(): void {
-    let routingManager = audio.getAudioManager().getRoutingManager();
+    let routingManager: audio.AudioRoutingManager = audio.getAudioManager().getRoutingManager();
     this.routingManager = routingManager;
   }
 
@@ -86,7 +85,7 @@ class AudioRoutingMangaerUtil {
       let rendererInfo: audio.AudioRendererInfo = {
         usage: audio.StreamUsage.STREAM_USAGE_VOICE_COMMUNICATION,
         rendererFlags: 0
-      }
+      };
       let currentDevice: audio.AudioDeviceDescriptors = this.getPreferOutputDeviceForRendererInfo(rendererInfo);
       Logger.info(TAG,
         `setCommunicationDevice sucess, deviceType:${currentDevice.length > 0 ? currentDevice[0].deviceType : ''}}`);
@@ -107,15 +106,13 @@ class AudioRoutingMangaerUtil {
     }
     this.routingManager.on(DEVICECHANGE, audio.DeviceFlag.ALL_DEVICES_FLAG,
       (deviceChanged: audio.DeviceChangeAction) => {
-
-        let sendParams = {
+        let sendParams: { isPlugged: boolean, hasMic: boolean, deviceName: string } = {
           isPlugged: false,
           hasMic: false,
-          deviceName: ""
+          deviceName: ''
         };
         let isFindWired: boolean = false;
         deviceChanged.deviceDescriptors.forEach((desc: audio.AudioDeviceDescriptor) => {
-
           if (desc.deviceType === audio.DeviceType.WIRED_HEADSET) {
             sendParams = {
               isPlugged: deviceChanged.type === audio.DeviceChangeType.CONNECT,
@@ -139,11 +136,9 @@ class AudioRoutingMangaerUtil {
             isFindWired = true;
           }
         })
-
         if (isFindWired && changeCk) {
           changeCk(sendParams, deviceChanged.type === audio.DeviceChangeType.CONNECT);
         }
-
       });
   }
 
@@ -152,6 +147,45 @@ class AudioRoutingMangaerUtil {
       return;
     }
     this.routingManager.off(DEVICECHANGE);
+  }
+
+  public isWiredHeadsetPluggedIn(): boolean {
+    return this.checkAudioRoute([audio.DeviceType.WIRED_HEADPHONES, audio.DeviceType.BLUETOOTH_SCO],
+      audio.DeviceFlag.OUTPUT_DEVICES_FLAG) ||
+    this.checkAudioRoute([audio.DeviceType.WIRED_HEADSET, audio.DeviceType.BLUETOOTH_SCO],
+      audio.DeviceFlag.INPUT_DEVICES_FLAG);
+  }
+
+  public checkAudioRoute(targetPortTypeArray: audio.DeviceType[], routeType: audio.DeviceFlag): boolean {
+    try {
+      let deviceDescriptors: audio.AudioDeviceDescriptors;
+      if (routeType === audio.DeviceFlag.OUTPUT_DEVICES_FLAG) {
+        let rendererInfo: audio.AudioRendererInfo = {
+          usage: audio.StreamUsage.STREAM_USAGE_VOICE_COMMUNICATION,
+          rendererFlags: 0
+        }
+        deviceDescriptors = this.getPreferOutputDeviceForRendererInfo(rendererInfo);
+      } else if (routeType === audio.DeviceFlag.INPUT_DEVICES_FLAG) {
+        let capturerInfo: audio.AudioCapturerInfo = {
+          source: audio.SourceType.SOURCE_TYPE_VOICE_COMMUNICATION,
+          capturerFlags: 0
+        }
+        deviceDescriptors = this.getPreferredInputDeviceForCapturerInfoSync(capturerInfo);
+      } else {
+        deviceDescriptors = this.getDevicesSync(routeType);
+      }
+      let isCurrentRoute: boolean = false;
+      deviceDescriptors.forEach((desc: audio.AudioDeviceDescriptor) => {
+        if (targetPortTypeArray.indexOf(desc.deviceType) >= 0) {
+          isCurrentRoute = true;
+        }
+      });
+      return isCurrentRoute;
+    } catch (error) {
+      let e: BusinessError = error as BusinessError;
+      Logger.error(TAG, `The checkAudioRoute call failed. error code: ${e.code}`);
+      return false;
+    }
   }
 }
 
