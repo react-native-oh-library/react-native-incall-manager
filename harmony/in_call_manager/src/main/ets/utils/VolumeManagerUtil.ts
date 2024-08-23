@@ -23,25 +23,23 @@
  */
 
 import { BusinessError } from '@ohos.base';
-import Logger from '../Logger'
 import { audio } from '@kit.AudioKit';
+import Logger from '../Logger';
 
 const TAG: string = 'VolumeManagerUtil';
 const MICSTATECHANGE: 'micStateChange' = 'micStateChange';
 
 class VolumeManagerUtil {
-  private volumeGroupManager: audio.AudioVolumeGroupManager = undefined;
+  private volumeGroupManager: audio.AudioVolumeGroupManager;
 
   constructor() {
     this.createAudioVolumeManager();
   }
 
-
   private createAudioVolumeManager(): void {
     // 麦克风、音量静音
     let audioVolumeManager = audio.getAudioManager().getVolumeManager();
     let groupId: number = audio.DEFAULT_VOLUME_GROUP_ID;
-
 
     audioVolumeManager.getVolumeGroupManager(groupId, (err: BusinessError, value: audio.AudioVolumeGroupManager) => {
       if (err) {
@@ -49,7 +47,6 @@ class VolumeManagerUtil {
         return;
       }
       this.volumeGroupManager = value;
-
       this.volumeGroupManager.on(MICSTATECHANGE, (micStateChange: audio.MicStateChangeEvent) => {
         Logger.info(TAG, `Current microphone status is: ${micStateChange.mute} `);
       });
@@ -79,22 +76,6 @@ class VolumeManagerUtil {
       return false;
     }
     return this.volumeGroupManager.isMicrophoneMuteSync();
-  }
-
-  public setMicrophoneMute(enable: boolean): void {
-    if (!this.volumeGroupManager) {
-      return;
-    }
-    try {
-      if (this.volumeGroupManager.setMicrophoneMute) {
-        this.volumeGroupManager.setMicrophoneMute(enable);
-      } else {
-        Logger.error(`not support to setMicrophoneMute.`);
-      }
-    } catch (error) {
-      let err: BusinessError = error as BusinessError;
-      Logger.error(`Failed to setMicrophoneMute. ${err.code}`);
-    }
   }
 }
 

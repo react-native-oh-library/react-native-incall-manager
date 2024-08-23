@@ -23,15 +23,15 @@
  */
 
 import { type BusinessError } from '@ohos.base';
-import Logger from '../Logger'
 import { camera } from '@kit.CameraKit';
 import { type common } from '@kit.AbilityKit';
+import Logger from '../Logger';
 
-const TAG: string = 'FlashUtil'
+const TAG: string = 'FlashUtil';
 
 export default class FlashUtil {
   public static setFlashOn(context: common.UIAbilityContext, enable: boolean): void {
-    let cameraManager: camera.CameraManager | undefined = undefined;
+    let cameraManager: camera.CameraManager;
     try {
       cameraManager = camera.getCameraManager(context);
       let torchMode: camera.TorchMode = enable ? camera.TorchMode.ON : camera.TorchMode.OFF;
@@ -41,7 +41,6 @@ export default class FlashUtil {
       } else {
         Logger.error(TAG, `The current device setFlashOn call is not Supported.`);
       }
-
     } catch (error) {
       let err: BusinessError = error as BusinessError;
       Logger.error(TAG, `The setFlashOn call failed. error code: ${err.code}`);
