@@ -2,10 +2,10 @@ export * from './Logger';
 
 export enum InCallManagerEventType {
   PROXIMITY_TYPE = 'Proximity',
-  WIREDHEADSET_TYPE = 'WiredHeadset',
-  NOISYAUDIO_TYPE = 'NoisyAudio',
-  MEDIABUTTON_TYPE = 'MediaButton',
-  ONAUDIOFOCUSCHANGE_TYPE = 'onAudioFocusChange',
+  WIRED_HEADSET_TYPE = 'WiredHeadset',
+  NOISY_AUDIO_TYPE = 'NoisyAudio',
+  MEDIA_BUTTON_TYPE = 'MediaButton',
+  ON_AUDIO_FOCUS_CHANGE_TYPE = 'onAudioFocusChange',
 }
 
 export type MediaType = 'video' | 'audio';
@@ -21,15 +21,15 @@ export enum PlayCategoryType {
 }
 
 export enum RingAudioType {
-  RINGSTONE = 'ringtone',
-  BUSYTONE = 'busytone',
-  RINGBACK = 'ringback',
+  RING_STONE = 'ringtone',
+  BUSY_TONE = 'busytone',
+  RING_BACK = 'ringback',
 }
 
 export enum DefaultToneUriType {
-  RINGSTONEURI = 'defaultRingtoneUri',
-  RINGBACKURI = 'defaultRingbackUri',
-  BUSYTONEURI = 'defaultBusytoneUri',
+  RINGS_TONE_URI = 'defaultRingToneUri',
+  RING_BACK_URI = 'defaultRingBackUri',
+  BUSY_TONE_URI = 'defaultBusyToneUri',
 }
 
 export enum ToneUriFromType {

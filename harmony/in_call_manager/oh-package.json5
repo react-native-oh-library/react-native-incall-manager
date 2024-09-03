@@ -9,7 +9,7 @@
   "metadata":{"sourceRoots":["./src/main"]},
   "dependencies": {
 //    "@rnoh/react-native-openharmony": 'file:../react_native_openharmony'
-    "@rnoh/react-native-openharmony": 'file:../libs/react_native_openharmony-5.0.0.401.har'
+    "@rnoh/react-native-openharmony": 'file:../libs/react_native_openharmony-5.0.0.491.har'
   }
 }
 

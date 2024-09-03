@@ -27,7 +27,7 @@ import { audio } from '@kit.AudioKit';
 import Logger from '../Logger';
 
 const TAG: string = 'VolumeManagerUtil';
-const MICSTATECHANGE: 'micStateChange' = 'micStateChange';
+const MIC_STATE_CHANGE: 'micStateChange' = 'micStateChange';
 
 class VolumeManagerUtil {
   private volumeGroupManager: audio.AudioVolumeGroupManager;
@@ -47,7 +47,7 @@ class VolumeManagerUtil {
         return;
       }
       this.volumeGroupManager = value;
-      this.volumeGroupManager.on(MICSTATECHANGE, (micStateChange: audio.MicStateChangeEvent) => {
+      this.volumeGroupManager.on(MIC_STATE_CHANGE, (micStateChange: audio.MicStateChangeEvent) => {
         Logger.info(TAG, `Current microphone status is: ${micStateChange.mute} `);
       });
     });

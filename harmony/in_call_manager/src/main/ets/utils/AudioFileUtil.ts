@@ -34,21 +34,21 @@ export default class AudioFileUtil {
   public static getAudioPath(audioType: string,
     fileType: string): string {
     let filePath: string = '';
-    if (audioType === RingAudioType.RINGBACK) {
+    if (audioType === RingAudioType.RING_BACK) {
       let fileBundle: string = RingtoneFilePath.bundleRingBackFilePath;
       let fileBundleExt: string = RingtoneFilePath.bundleRingBackFilePathExt;
       let fileSysPath: string = RingtoneFilePath.defaultRingBackFilePath;
       let fileSysWithExt: string = RingtoneFilePath.defaultRingBackFilePathExt;
       filePath = fileType === ToneUriFromType.BUNDLE ? `${AUDIO_FILE_PATH_BEFORE}${fileBundle}.${fileBundleExt}` :
         `${AUDIO_FILE_PATH_BEFORE}${fileSysPath}.${fileSysWithExt}`;
-    } else if (audioType === RingAudioType.BUSYTONE) {
+    } else if (audioType === RingAudioType.BUSY_TONE) {
       let fileBundle: string = RingtoneFilePath.bundleBusyToneFilePath;
       let fileBundleExt: string = RingtoneFilePath.bundleBusyToneFilePathExt;
       let fileSysPath: string = RingtoneFilePath.defaultBusyToneFilePath;
       let fileSysWithExt: string = RingtoneFilePath.defaultBusyToneFilePathExt;
       filePath = fileType === ToneUriFromType.BUNDLE ? `${AUDIO_FILE_PATH_BEFORE}${fileBundle}.${fileBundleExt}` :
         `${AUDIO_FILE_PATH_BEFORE}${fileSysPath}.${fileSysWithExt}`;
-    } else if (audioType === RingAudioType.RINGSTONE) {
+    } else if (audioType === RingAudioType.RING_STONE) {
       let fileBundle: string = RingtoneFilePath.bundleRingToneFilePath;
       let fileBundleExt: string = RingtoneFilePath.bundleRingToneFilePathExt;
       let fileSysPath: string = RingtoneFilePath.defaultRingToneFilePath;
@@ -64,11 +64,11 @@ export default class AudioFileUtil {
   public static getAudioUriJS(context: common.UIAbilityContext,
     audioType: string, fileType: string): resourceManager.RawFileDescriptor {
     let result: resourceManager.RawFileDescriptor;
-    if (audioType === RingAudioType.RINGBACK) {
-      result = AudioFileUtil.getRingbackUri(context, fileType);
-    } else if (audioType === RingAudioType.BUSYTONE) {
-      result = AudioFileUtil.getBusytoneUri(context, fileType);
-    } else if (audioType === RingAudioType.RINGSTONE) {
+    if (audioType === RingAudioType.RING_BACK) {
+      result = AudioFileUtil.getRingBackUri(context, fileType);
+    } else if (audioType === RingAudioType.BUSY_TONE) {
+      result = AudioFileUtil.getBusyToneUri(context, fileType);
+    } else if (audioType === RingAudioType.RING_STONE) {
       result = AudioFileUtil.getRingtoneUri(context, fileType);
     } else {
       Logger.error(`The getAudioUriJS call failed param audioType invalid value`);
@@ -76,35 +76,35 @@ export default class AudioFileUtil {
     return result;
   }
 
-  public static getRingbackUri(context: common.UIAbilityContext,
+  public static getRingBackUri(context: common.UIAbilityContext,
     ringPathType: string): resourceManager.RawFileDescriptor {
     let fileBundle: string = RingtoneFilePath.bundleRingBackFilePath;
     let fileBundleExt: string = RingtoneFilePath.bundleRingBackFilePathExt;
     let fileSysPath: string = RingtoneFilePath.defaultRingBackFilePath;
     let fileSysWithExt: string = RingtoneFilePath.defaultRingBackFilePathExt;
     if ((!ringPathType || ringPathType === ToneUriFromType.DEFAULT)) {
-      return AudioFileUtil.getDefaultUserUri(context, DefaultToneUriType.RINGBACKURI);
+      return AudioFileUtil.getDefaultUserUri(context, DefaultToneUriType.RING_BACK_URI);
     }
     let typeStr: string = ringPathType;
     let uri: resourceManager.RawFileDescriptor =
       AudioFileUtil.getAudioUriPath(context, typeStr, fileBundle, fileBundleExt, fileSysPath, fileSysWithExt,
-        DefaultToneUriType.RINGBACKURI);
+        DefaultToneUriType.RING_BACK_URI);
     return uri;
   }
 
-  public static getBusytoneUri(context: common.UIAbilityContext,
+  public static getBusyToneUri(context: common.UIAbilityContext,
     ringPathType: string): resourceManager.RawFileDescriptor {
     let fileBundle: string = RingtoneFilePath.bundleBusyToneFilePath;
     let fileBundleExt: string = RingtoneFilePath.bundleBusyToneFilePathExt;
     let fileSysPath: string = RingtoneFilePath.defaultBusyToneFilePath;
     let fileSysWithExt: string = RingtoneFilePath.defaultBusyToneFilePathExt;
     if ((!ringPathType || ringPathType === ToneUriFromType.DEFAULT)) {
-      return AudioFileUtil.getDefaultUserUri(context, DefaultToneUriType.BUSYTONEURI);
+      return AudioFileUtil.getDefaultUserUri(context, DefaultToneUriType.BUSY_TONE_URI);
     }
     let typeStr: string = ringPathType;
     let uri: resourceManager.RawFileDescriptor =
       AudioFileUtil.getAudioUriPath(context, typeStr, fileBundle, fileBundleExt, fileSysPath, fileSysWithExt,
-        DefaultToneUriType.BUSYTONEURI);
+        DefaultToneUriType.BUSY_TONE_URI);
     return uri;
   }
 
@@ -115,12 +115,12 @@ export default class AudioFileUtil {
     let fileSysPath: string = RingtoneFilePath.defaultRingToneFilePath;
     let fileSysWithExt: string = RingtoneFilePath.defaultRingToneFilePathExt;
     if ((!ringPathType || ringPathType === ToneUriFromType.DEFAULT)) {
-      return AudioFileUtil.getDefaultUserUri(context, DefaultToneUriType.RINGSTONEURI);
+      return AudioFileUtil.getDefaultUserUri(context, DefaultToneUriType.RINGS_TONE_URI);
     }
     let typeStr: string = ringPathType;
     let uri: resourceManager.RawFileDescriptor =
       AudioFileUtil.getAudioUriPath(context, typeStr, fileBundle, fileBundleExt, fileSysPath, fileSysWithExt,
-        DefaultToneUriType.RINGSTONEURI);
+        DefaultToneUriType.RINGS_TONE_URI);
     return uri;
   }
 
@@ -156,7 +156,7 @@ export default class AudioFileUtil {
   }
 
   private static getDefaultUserUri(context: common.UIAbilityContext, type: string): resourceManager.RawFileDescriptor {
-    if (type === DefaultToneUriType.RINGSTONEURI) {
+    if (type === DefaultToneUriType.RINGS_TONE_URI) {
       let path: string =
         `${context.resourceDir}/${RingtoneFilePath.defaultRingToneFilePath}.${RingtoneFilePath.defaultRingToneFilePathExt}`;
       let sysFileUri: resourceManager.RawFileDescriptor = context.resourceManager.getRawFdSync(path);
@@ -164,7 +164,7 @@ export default class AudioFileUtil {
         return sysFileUri;
       }
       return null;
-    } else if (type === DefaultToneUriType.RINGBACKURI) {
+    } else if (type === DefaultToneUriType.RING_BACK_URI) {
       let path: string =
         `${context.resourceDir}/${RingtoneFilePath.defaultRingBackFilePath}.${RingtoneFilePath.defaultRingBackFilePathExt}`;
       let sysFileUri: resourceManager.RawFileDescriptor = context.resourceManager.getRawFdSync(path);
@@ -172,7 +172,7 @@ export default class AudioFileUtil {
         return sysFileUri;
       }
       return null;
-    } else if (type === DefaultToneUriType.BUSYTONEURI) {
+    } else if (type === DefaultToneUriType.BUSY_TONE_URI) {
       let path: string =
         `${context.resourceDir}/${RingtoneFilePath.defaultBusyToneFilePath}.${RingtoneFilePath.defaultBusyToneFilePathExt}`;
       let sysFileUri: resourceManager.RawFileDescriptor = context.resourceManager.getRawFdSync(path);
