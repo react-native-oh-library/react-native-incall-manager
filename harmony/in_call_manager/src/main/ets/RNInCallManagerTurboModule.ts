@@ -40,7 +40,7 @@ import {
 } from './index';
 import ContinueBackgroundTaskModel from './model/ContinueBackgroundTaskModel';
 import ProximityLockUtil from './utils/ProximityLockUtil';
-import AudioRoutingMangaerUtil from './utils/AudioRoutingMangaerUtil';
+import AudioRoutingManagerUtil from './utils/AudioRoutingManagerUtil';
 import VolumeManagerUtil from './utils/VolumeManagerUtil';
 import FlashUtil from './utils/FlashUtil';
 import AudioFileUtil from './utils/AudioFileUtil';
@@ -62,13 +62,13 @@ export class RNInCallManagerTurboModule extends TurboModule {
   private media: string;
   private audioSessionInitialized: boolean = false;
   private ringtone: PlayModel;
-  private ringback: PlayModel;
-  private busytone: PlayModel;
+  private ringBack: PlayModel;
+  private busyTone: PlayModel;
   private isProximityRegistered: boolean = false;
   private proximityIsNear: boolean = false;
   private isAudioSessionRouteChangeRegistered: boolean = false;
   private forceSpeakerOn: number = 0;
-  private incallAudioMode: avSession.AVSessionType;
+  private inCallAudioMode: avSession.AVSessionType;
   private isOrigAudioSetupStored: boolean = false;
   private origIsSpeakerPhoneOn: boolean = false;
   private origIsMicrophoneMute: boolean = false;
@@ -79,11 +79,11 @@ export class RNInCallManagerTurboModule extends TurboModule {
     this.audioSession = null;
     this.audioSessionInitialized = false;
     this.ringtone = null;
-    this.ringback = null;
-    this.ringback = null;
+    this.ringBack = null;
+    this.busyTone = null;
     this.isProximityRegistered = false;
     this.proximityIsNear = false;
-    this.incallAudioMode = RNInCallManagerTurboModule.AVSESSION_TYPE_VOICE_CALL;
+    this.inCallAudioMode = RNInCallManagerTurboModule.AVSESSION_TYPE_VOICE_CALL;
     this.forceSpeakerOn = 0;
     this.media = MediaTypeEnum.AUDIO;
     this.continueBackgroundTask = new ContinueBackgroundTaskModel(this.ctx.uiAbilityContext as common.UIAbilityContext);
@@ -98,7 +98,7 @@ export class RNInCallManagerTurboModule extends TurboModule {
   public start(
     media: MediaType,
     auto: boolean,
-    ringback: string): void {
+    ringBack: string): void {
     if (this.audioSessionInitialized) {
       return;
     }
@@ -108,11 +108,11 @@ export class RNInCallManagerTurboModule extends TurboModule {
     }
     this.media = media;
     const isVideo = media === MediaTypeEnum.VIDEO;
-    this.incallAudioMode = isVideo ? RNInCallManagerTurboModule.AVSESSION_TYPE_VIDEO_CALL :
+    this.inCallAudioMode = isVideo ? RNInCallManagerTurboModule.AVSESSION_TYPE_VIDEO_CALL :
     RNInCallManagerTurboModule.AVSESSION_TYPE_VOICE_CALL;
     if (!this.audioSession) {
       avSession.createAVSession(this.ctx.uiAbilityContext, RNInCallManagerTurboModule.AVSESSION_TAG,
-        this.incallAudioMode, (err: BusinessError, data: avSession.AVSession) => {
+        this.inCallAudioMode, (err: BusinessError, data: avSession.AVSession) => {
           if (err) {
             Logger.error(`CreateAVSession BusinessError: code: ${err.code}`);
           } else {
@@ -128,22 +128,22 @@ export class RNInCallManagerTurboModule extends TurboModule {
     this.storeOriginalAudioSetup();
     this.forceSpeakerOn = 0;
     this.startAudioSessionNotification();
-    if (ringback && ringback.length > 0) {
-      this.startRingback(ringback);
+    if (ringBack && ringBack.length > 0) {
+      this.startRingback(ringBack);
     }
     this.audioSessionInitialized = true;
   }
 
-  public stop(busytoneUriType: string): Promise<void> {
+  public stop(busyToneUriType: string): Promise<void> {
     if (!this.audioSessionInitialized) {
       return;
     }
     this.stopRingback();
-    if (busytoneUriType.length > 0 && this.startBusytone(busytoneUriType)) {
+    if (busyToneUriType.length > 0 && this.startBusyTone(busyToneUriType)) {
       return;
     } else {
       this.restoreOriginalAudioSetup();
-      this.stopBusytone();
+      this.stopBusyTone();
       this.stopAudioSessionNotification();
       this.setSpeakerphoneOn(false);
       this.setMicrophoneMute(false);
@@ -189,7 +189,7 @@ export class RNInCallManagerTurboModule extends TurboModule {
 
   public getIsWiredHeadsetPluggedIn(): Promise<{ isWiredHeadsetPluggedIn: boolean }> {
     return new Promise((resolve) => {
-      let isWiredHeadsetPluggedIn = AudioRoutingMangaerUtil ? AudioRoutingMangaerUtil.isWiredHeadsetPluggedIn() : false;
+      let isWiredHeadsetPluggedIn = AudioRoutingManagerUtil ? AudioRoutingManagerUtil.isWiredHeadsetPluggedIn() : false;
       resolve({ isWiredHeadsetPluggedIn: isWiredHeadsetPluggedIn });
     });
   }
@@ -260,7 +260,7 @@ export class RNInCallManagerTurboModule extends TurboModule {
             eventText: interruptText,
             eventCode: interruptCode,
           };
-          this.ctx.rnInstance.emitDeviceEvent(InCallManagerEventType.ONAUDIOFOCUSCHANGE_TYPE, data);
+          this.ctx.rnInstance.emitDeviceEvent(InCallManagerEventType.ON_AUDIO_FOCUS_CHANGE_TYPE, data);
         });
       this.ringtone.setOnPlayComplete((isComplete: boolean) => {
       });
@@ -288,7 +288,7 @@ export class RNInCallManagerTurboModule extends TurboModule {
       return;
     }
     try {
-      if (AudioRoutingMangaerUtil.checkAudioRoute([audio.DeviceType.EARPIECE], audio.DeviceFlag.OUTPUT_DEVICES_FLAG)) {
+      if (AudioRoutingManagerUtil.checkAudioRoute([audio.DeviceType.EARPIECE], audio.DeviceFlag.OUTPUT_DEVICES_FLAG)) {
         this.turnScreenOff();
       }
       sensor.on(sensor.SensorId.PROXIMITY, (data: sensor.ProximityResponse) => {
@@ -310,7 +310,7 @@ export class RNInCallManagerTurboModule extends TurboModule {
       return;
     }
     try {
-      if (AudioRoutingMangaerUtil.checkAudioRoute([audio.DeviceType.EARPIECE], audio.DeviceFlag.OUTPUT_DEVICES_FLAG)) {
+      if (AudioRoutingManagerUtil.checkAudioRoute([audio.DeviceType.EARPIECE], audio.DeviceFlag.OUTPUT_DEVICES_FLAG)) {
         this.turnScreenOn();
       }
       sensor.off(sensor.SensorId.PROXIMITY);
@@ -321,41 +321,41 @@ export class RNInCallManagerTurboModule extends TurboModule {
     this.isProximityRegistered = false;
   }
 
-  public startRingback(ringbackUriType: string): void {
+  public startRingback(ringBackUriType: string): void {
     try {
-      if (this.ringback && this.ringback.isPlaying()) {
+      if (this.ringBack && this.ringBack.isPlaying()) {
         Logger.info(TAG, 'startRingback is already playing.');
         return;
-      } else if (this.ringback && !this.ringback.isPlaying()) {
+      } else if (this.ringBack && !this.ringBack.isPlaying()) {
         this.stopRingback();
       }
-      let ringbackUriTypeNew: string =
-        ringbackUriType === ToneUriFromType.DTMF ? ToneUriFromType.DEFAULT : ringbackUriType;
+      let ringBackUriTypeNew: string =
+        ringBackUriType === ToneUriFromType.DTMF ? ToneUriFromType.DEFAULT : ringBackUriType;
 
-      let ringbackUri: resourceManager.RawFileDescriptor =
-        AudioFileUtil.getRingbackUri(this.ctx.uiAbilityContext, ringbackUriTypeNew);
-      if (!ringbackUri) {
+      let ringBackUri: resourceManager.RawFileDescriptor =
+        AudioFileUtil.getRingBackUri(this.ctx.uiAbilityContext, ringBackUriTypeNew);
+      if (!ringBackUri) {
         Logger.info(TAG, 'startRingback: no available media');
         return;
       }
-      let isEarDevice: boolean = AudioRoutingMangaerUtil.checkAudioRoute([audio.DeviceType.EARPIECE],
+      let isEarDevice: boolean = AudioRoutingManagerUtil.checkAudioRoute([audio.DeviceType.EARPIECE],
         audio.DeviceFlag.OUTPUT_DEVICES_FLAG) ||
-        this.incallAudioMode !== RNInCallManagerTurboModule.AVSESSION_TYPE_VIDEO_CALL;
+        this.inCallAudioMode !== RNInCallManagerTurboModule.AVSESSION_TYPE_VIDEO_CALL;
       let audioRenderInfoObj: audio.AudioRendererInfo = {
         content: isEarDevice ? audio.ContentType.CONTENT_TYPE_SPEECH : audio.ContentType.CONTENT_TYPE_MUSIC,
         usage: audio.StreamUsage.STREAM_USAGE_VOICE_COMMUNICATION,
         rendererFlags: 0
       };
-      let fileFd: resourceManager.RawFileDescriptor = ringbackUri;
-      this.ringback =
+      let fileFd: resourceManager.RawFileDescriptor = ringBackUri;
+      this.ringBack =
         new PlayModel(this.ctx.uiAbilityContext, false, (interruptCode: number, interruptText: string) => {
           let data = {
             eventText: interruptText,
             eventCode: interruptCode,
           };
-          this.ctx.rnInstance.emitDeviceEvent(InCallManagerEventType.ONAUDIOFOCUSCHANGE_TYPE, data);
+          this.ctx.rnInstance.emitDeviceEvent(InCallManagerEventType.ON_AUDIO_FOCUS_CHANGE_TYPE, data);
         });
-      this.ringback.prepareWithPlayFd(fileFd, audioRenderInfoObj, true);
+      this.ringBack.prepareWithPlayFd(fileFd, audioRenderInfoObj, true);
       if (this.continueBackgroundTask) {
         this.continueBackgroundTask.startContinueBackgroundTask();
       }
@@ -370,9 +370,9 @@ export class RNInCallManagerTurboModule extends TurboModule {
     if (this.continueBackgroundTask) {
       this.continueBackgroundTask.stopContinueBackgroundTask();
     }
-    if (this.ringback) {
-      this.ringback.release();
-      this.ringback = null;
+    if (this.ringBack) {
+      this.ringBack.release();
+      this.ringBack = null;
     }
   }
 
@@ -413,19 +413,19 @@ export class RNInCallManagerTurboModule extends TurboModule {
     });
   }
 
-  private startBusytone(busytoneUriStatus: string): boolean {
+  private startBusyTone(busyToneUriStatus: string): boolean {
     try {
-      if (this.busytone && this.busytone.isPlaying()) {
+      if (this.busyTone && this.busyTone.isPlaying()) {
         return false;
-      } else if (this.busytone && !this.busytone.isPlaying()) {
-        this.stopBusytone();
+      } else if (this.busyTone && !this.busyTone.isPlaying()) {
+        this.stopBusyTone();
       }
-      let busytoneUriType: string = busytoneUriStatus === ToneUriFromType.DTMF ? ToneUriFromType.DEFAULT
-        : busytoneUriStatus;
-      let busytoneUri: resourceManager.RawFileDescriptor =
-        AudioFileUtil.getBusytoneUri(this.ctx.uiAbilityContext, busytoneUriType);
-      if (!busytoneUri) {
-        Logger.info(TAG, 'startBusytone: no available media');
+      let busyToneUriType: string = busyToneUriStatus === ToneUriFromType.DTMF ? ToneUriFromType.DEFAULT
+        : busyToneUriStatus;
+      let busyToneUri: resourceManager.RawFileDescriptor =
+        AudioFileUtil.getBusyToneUri(this.ctx.uiAbilityContext, busyToneUriType);
+      if (!busyToneUri) {
+        Logger.info(TAG, 'startBusyTone: no available media');
         return;
       }
       let audioRenderInfoObj: audio.AudioRendererInfo = {
@@ -433,37 +433,37 @@ export class RNInCallManagerTurboModule extends TurboModule {
         usage: audio.StreamUsage.STREAM_USAGE_VOICE_COMMUNICATION,
         rendererFlags: 0
       };
-      let fileFd: resourceManager.RawFileDescriptor = busytoneUri;
-      this.busytone =
+      let fileFd: resourceManager.RawFileDescriptor = busyToneUri;
+      this.busyTone =
         new PlayModel(this.ctx.uiAbilityContext, false, (interruptCode: number, interruptText: string) => {
           let data = {
             eventText: interruptText,
             eventCode: interruptCode,
           };
-          this.ctx.rnInstance.emitDeviceEvent(InCallManagerEventType.ONAUDIOFOCUSCHANGE_TYPE, data);
+          this.ctx.rnInstance.emitDeviceEvent(InCallManagerEventType.ON_AUDIO_FOCUS_CHANGE_TYPE, data);
         });
-      this.busytone.setOnPlayComplete((isComplete: boolean) => {
+      this.busyTone.setOnPlayComplete((isComplete: boolean) => {
         this.stop('');
       });
-      this.busytone.prepareWithPlayFd(fileFd, audioRenderInfoObj, false);
+      this.busyTone.prepareWithPlayFd(fileFd, audioRenderInfoObj, false);
       return true;
     } catch (error) {
       let err: BusinessError = error as BusinessError;
-      Logger.error(`The startBusytone call failed. error code: ${err.code}`);
+      Logger.error(`The startBusyTone call failed. error code: ${err.code}`);
       return false;
     }
   }
 
-  private stopBusytone(): void {
-    if (this.busytone) {
-      this.busytone.release();
-      this.busytone = null;
+  private stopBusyTone(): void {
+    if (this.busyTone) {
+      this.busyTone.release();
+      this.busyTone = null;
     }
   }
 
   private storeOriginalAudioSetup(): void {
     if (!this.isOrigAudioSetupStored) {
-      this.origIsSpeakerPhoneOn = AudioRoutingMangaerUtil.isSpeakerphoneOn();
+      this.origIsSpeakerPhoneOn = AudioRoutingManagerUtil.isSpeakerphoneOn();
       this.origIsMicrophoneMute = VolumeManagerUtil.isMicrophoneMuteSync();
       this.isOrigAudioSetupStored = true;
     }
@@ -496,21 +496,21 @@ export class RNInCallManagerTurboModule extends TurboModule {
       eventText: keyText,
       eventCode: code
     };
-    this.ctx.rnInstance.emitDeviceEvent(InCallManagerEventType.MEDIABUTTON_TYPE, params);
+    this.ctx.rnInstance.emitDeviceEvent(InCallManagerEventType.MEDIA_BUTTON_TYPE, params);
   }
 
   private startAudioSessionRouteChangeNotification(): void {
     if (this.isAudioSessionRouteChangeRegistered) {
       return;
     }
-    if (!AudioRoutingMangaerUtil) {
+    if (!AudioRoutingManagerUtil) {
       return;
     }
-    AudioRoutingMangaerUtil.onDeviceChangeWithWiredheadset((param: { isPlugged: boolean, hasMic: boolean, deviceName: string },
+    AudioRoutingManagerUtil.onDeviceChangeWithWiredHeadSet((param: { isPlugged: boolean, hasMic: boolean, deviceName: string },
       isConnect: boolean) => {
-      this.ctx.rnInstance.emitDeviceEvent(InCallManagerEventType.WIREDHEADSET_TYPE, param);
+      this.ctx.rnInstance.emitDeviceEvent(InCallManagerEventType.WIRED_HEADSET_TYPE, param);
       if (!isConnect) {
-        this.ctx.rnInstance.emitDeviceEvent(InCallManagerEventType.NOISYAUDIO_TYPE, null);
+        this.ctx.rnInstance.emitDeviceEvent(InCallManagerEventType.NOISY_AUDIO_TYPE, null);
       }
     });
     this.isAudioSessionRouteChangeRegistered = true;
@@ -520,10 +520,10 @@ export class RNInCallManagerTurboModule extends TurboModule {
     if (!this.isAudioSessionRouteChangeRegistered) {
       return;
     }
-    if (!AudioRoutingMangaerUtil) {
+    if (!AudioRoutingManagerUtil) {
       return;
     }
-    AudioRoutingMangaerUtil.offDeviceChange();
+    AudioRoutingManagerUtil.offDeviceChange();
     this.isAudioSessionRouteChangeRegistered = false;
   }
 

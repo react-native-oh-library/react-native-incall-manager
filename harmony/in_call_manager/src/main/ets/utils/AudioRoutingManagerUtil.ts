@@ -26,10 +26,10 @@ import { type BusinessError } from '@ohos.base';
 import { audio } from '@kit.AudioKit';
 import Logger from '../Logger';
 
-const TAG: string = 'AudioRoutingMangaerUtil';
+const TAG: string = 'AudioRoutingManagerUtil';
 const DEVICECHANGE: 'deviceChange' = 'deviceChange';
 
-class AudioRoutingMangaerUtil {
+class AudioRoutingManagerUtil {
   private routingManager: audio.AudioRoutingManager;
 
   constructor() {
@@ -74,7 +74,7 @@ class AudioRoutingMangaerUtil {
       return;
     }
     if (this.routingManager) {
-      Logger.error(TAG, 'current not support change outputdevice route');
+      Logger.error(TAG, 'current not support change output device route');
       return;
     }
     this.routingManager.setCommunicationDevice(deviceType, enable, (err: BusinessError) => {
@@ -99,7 +99,7 @@ class AudioRoutingMangaerUtil {
     return this.routingManager.getDevicesSync(deviceFlag);
   }
 
-  public onDeviceChangeWithWiredheadset(changeCk: (params: { isPlugged: boolean, hasMic: boolean, deviceName: string },
+  public onDeviceChangeWithWiredHeadSet(changeCk: (params: { isPlugged: boolean, hasMic: boolean, deviceName: string },
     isConnect: boolean) => void): void {
     if (!this.routingManager) {
       return;
@@ -166,11 +166,11 @@ class AudioRoutingMangaerUtil {
         }
         deviceDescriptors = this.getPreferOutputDeviceForRendererInfo(rendererInfo);
       } else if (routeType === audio.DeviceFlag.INPUT_DEVICES_FLAG) {
-        let capturerInfo: audio.AudioCapturerInfo = {
+        let captureInfo: audio.AudioCapturerInfo = {
           source: audio.SourceType.SOURCE_TYPE_VOICE_COMMUNICATION,
           capturerFlags: 0
         }
-        deviceDescriptors = this.getPreferredInputDeviceForCapturerInfoSync(capturerInfo);
+        deviceDescriptors = this.getPreferredInputDeviceForCapturerInfoSync(captureInfo);
       } else {
         deviceDescriptors = this.getDevicesSync(routeType);
       }
@@ -189,4 +189,4 @@ class AudioRoutingMangaerUtil {
   }
 }
 
-export default new AudioRoutingMangaerUtil();
+export default new AudioRoutingManagerUtil();
