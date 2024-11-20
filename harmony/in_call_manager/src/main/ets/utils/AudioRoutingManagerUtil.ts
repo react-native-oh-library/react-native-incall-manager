@@ -134,6 +134,13 @@ class AudioRoutingManagerUtil {
               deviceName: desc.name
             };
             isFindWired = true;
+          } else if (desc.deviceType === audio.DeviceType.USB_HEADSET) {
+            sendParams = {
+              isPlugged: deviceChanged.type === audio.DeviceChangeType.CONNECT,
+              hasMic: true,
+              deviceName: desc.name
+            };
+            isFindWired = true;
           }
         })
         if (isFindWired && changeCk) {
@@ -150,9 +157,9 @@ class AudioRoutingManagerUtil {
   }
 
   public isWiredHeadsetPluggedIn(): boolean {
-    return this.checkAudioRoute([audio.DeviceType.WIRED_HEADPHONES, audio.DeviceType.BLUETOOTH_SCO],
+    return this.checkAudioRoute([audio.DeviceType.USB_HEADSET, audio.DeviceType.WIRED_HEADPHONES, audio.DeviceType.BLUETOOTH_SCO],
       audio.DeviceFlag.OUTPUT_DEVICES_FLAG) ||
-    this.checkAudioRoute([audio.DeviceType.WIRED_HEADSET, audio.DeviceType.BLUETOOTH_SCO],
+    this.checkAudioRoute([audio.DeviceType.USB_HEADSET, audio.DeviceType.WIRED_HEADSET, audio.DeviceType.BLUETOOTH_SCO],
       audio.DeviceFlag.INPUT_DEVICES_FLAG);
   }
 
