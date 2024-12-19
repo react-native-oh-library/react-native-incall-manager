@@ -1,0 +1,11 @@
+[
+    {
+        "Name": "react-native-incall-manager",
+        "License": "MIT License",
+        "License File": "https://github.com/react-native-webrtc/react-native-incall-manager/blob/master/LICENSE",
+        "Version Number": "4.2.0-0.0.3",
+        "Owner" : "xiafeng@huawei.com",
+        "Upstream URL": "https://github.com/react-native-webrtc/react-native-incall-manager",
+        "Description": "incall-manager for react-native"
+    }
+]
